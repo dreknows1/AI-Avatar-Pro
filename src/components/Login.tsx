@@ -53,7 +53,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
       }
 
       // 2. Send Magic Link
-      await supabase.auth.signInWithOtp({
+      const { error: otpError } = await supabase.auth.signInWithOtp({
   email,
   options: {
     emailRedirectTo: `${window.location.origin}/auth/callback`
