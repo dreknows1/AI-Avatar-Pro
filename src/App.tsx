@@ -7,7 +7,6 @@ import { ResultsDisplay } from './components/ResultsDisplay';
 import { Navigation } from './components/Navigation';
 import { Profile } from './components/Profile';
 import { ImageGenerator } from './components/ImageGenerator';
-import { ApiKeySelector } from './components/ApiKeySelector';
 import { Login } from './components/Login';
 import { MAX_FREE_AVATARS } from './constants';
 import * as geminiService from './services/geminiService';
@@ -23,9 +22,11 @@ type View = 'create' | 'profile' | 'generator';
 type Step = 'style' | 'dna' | 'results';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userEmail, setUserEmail] = useState('');
-  const [apiKeySelected, setApiKeySelected] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(localStorage.getItem('biam_user_email') !== null);
+  const [userEmail, setUserEmail] = useState(localStorage.getItem('biam_user_email') || '');
+  
+  const [apiKeySelected, setApiKeySelected] = useState(true);
+  
   const [currentView, setCurrentView] = useState<View>('create');
   const [currentStep, setCurrentStep] = useState<Step>('style');
   const [savedAvatars, setSavedAvatars] = useState<SavedAvatar[]>([]);
@@ -34,7 +35,7 @@ function App() {
   
   const [avatarStyle, setAvatarStyle] = useState<AvatarStyle>('Realistic');
   const [features, setFeatures] = useState<Features>({
-    description: '', age: 'Select Age', gender: '', build: 'Average', culture: '', eyes: '', hair: '', complexion: '', distinguishingFeatures: '', clothing: ''
+    description: '', age: 'Select Age Range', gender: '', build: 'Average', culture: '', eyes: '', hair: '', complexion: '', distinguishingFeatures: '', clothing: ''
   });
   const [userReferenceImage, setUserReferenceImage] = useState<string | null>(null);
   const [generationStatus, setGenerationStatus] = useState<GenerationStatus>({
@@ -55,19 +56,12 @@ function App() {
       if ((window as any).aistudio) {
           try {
               const hasKey = await (window as any).aistudio.hasSelectedApiKey();
-              setApiKeySelected(hasKey);
+              if (!hasKey && !process.env.API_KEY) setApiKeySelected(false);
           } catch (e) { console.error(e); }
-      } else if (process.env.API_KEY) {
-          setApiKeySelected(true);
       }
   };
 
   useEffect(() => {
-    const storedEmail = localStorage.getItem('biam_user_email');
-    if (storedEmail) {
-      setUserEmail(storedEmail);
-      setIsAuthenticated(true);
-    }
     const storedSlots = localStorage.getItem('biam_purchased_slots');
     if (storedSlots) setPurchasedSlots(parseInt(storedSlots, 10));
     checkApiKey();
@@ -88,6 +82,7 @@ function App() {
     setIsAuthenticated(false);
     setUserEmail('');
     setSavedAvatars([]);
+    setCurrentStep('style');
   };
 
   const handleSelectStyle = (style: AvatarStyle) => {
@@ -134,6 +129,9 @@ function App() {
         setGenerationStatus({ generating: false, message: 'Identity Locked.', progress: 100, error: null, phase: 'idle' });
         setCurrentStep('results');
     } catch (error: any) {
+        if (error.message.includes("Requested entity was not found") || error.message.includes("API Key")) {
+           setApiKeySelected(false);
+        }
         setGenerationStatus({ generating: false, message: '', progress: 0, error: error.message || "An unexpected error occurred.", phase: 'idle' });
     }
   };
@@ -167,7 +165,21 @@ function App() {
          userEmail={userEmail} purchasedSlots={purchasedSlots} avatarsCreated={savedAvatars.length}
        />
        <main className="container mx-auto">
-          {!apiKeySelected && <ApiKeySelector onKeySelect={() => window.aistudio.openSelectKey().then(() => setApiKeySelected(true))} />}
+          {!apiKeySelected && (
+            <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-6 backdrop-blur-xl">
+               <div className="bg-[#111827] p-12 rounded-[3rem] border border-indigo-500/30 text-center max-w-md">
+                 <h2 className="text-3xl font-black text-white mb-6 uppercase tracking-tight">API Access Required</h2>
+                 <p className="text-slate-400 mb-10 text-sm leading-relaxed">To use Gemini 3 Pro and Veo models, you must select your own paid API key from AI Studio.</p>
+                 <button 
+                  onClick={() => window.aistudio.openSelectKey().then(() => setApiKeySelected(true))}
+                  className="w-full bg-[#008080] py-5 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-[#006666] transition-all"
+                 >
+                   Select API Key
+                 </button>
+               </div>
+            </div>
+          )}
+
           {currentView === 'create' && (
               <div className="flex flex-col items-center">
                   {generationStatus.generating ? (
@@ -192,7 +204,11 @@ function App() {
                     <ResultsDisplay 
                       videoUrl={resultVideoUrl!}
                       imageUrl={resultImageUrl!}
-                      onReset={() => setCurrentStep('style')}
+                      onReset={() => {
+                        setCurrentStep('style');
+                        setResultVideoUrl(null);
+                        setResultImageUrl(null);
+                      }}
                       onSaveToProfile={handleSaveToProfile}
                     />
                   )}
@@ -202,8 +218,16 @@ function App() {
             <div className="pt-8">
               <Profile 
                 savedAvatars={savedAvatars} 
-                onEdit={(a) => { setFeatures(a.features); setAvatarStyle(a.avatarStyle); setCurrentStep('dna'); setCurrentView('create'); }} 
-                onUseInGenerator={(a) => { setActiveAvatarForGenerator(a); setCurrentView('generator'); }} 
+                onEdit={(a) => { 
+                    setFeatures(a.features); 
+                    setAvatarStyle(a.avatarStyle); 
+                    setCurrentStep('dna'); 
+                    setCurrentView('create'); 
+                }} 
+                onUseInGenerator={(a) => { 
+                    setActiveAvatarForGenerator(a); 
+                    setCurrentView('generator'); 
+                }} 
                 refreshAvatars={loadAvatars} 
               />
             </div>

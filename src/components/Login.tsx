@@ -70,6 +70,10 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
     }
   };
 
+  const handleDevBypass = () => {
+    onLogin('preview@editor.session');
+  };
+
   return (
     <div className="min-h-screen bg-[#050810] flex items-center justify-center p-6 font-sans selection:bg-indigo-500/30">
       <div className="max-w-md w-full bg-[#111827]/80 rounded-[3rem] shadow-2xl border border-white/5 p-12 backdrop-blur-3xl relative overflow-hidden">
@@ -136,11 +140,18 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
               )}
             </button>
             
-            <div className="text-center">
-               <p className="text-[9px] text-slate-600 uppercase tracking-widest leading-relaxed">
-                  Exclusive access for verified community members only.<br/>
-                  Powered by Gemini 3 Pro & Veo.
-               </p>
+            <div className="pt-4 flex flex-col items-center gap-4">
+              <button 
+                type="button"
+                onClick={handleDevBypass}
+                className="text-[10px] text-slate-500 hover:text-indigo-400 transition-colors font-black uppercase tracking-widest"
+              >
+                Bypass for Editor Preview
+              </button>
+              <p className="text-[9px] text-slate-600 uppercase tracking-widest leading-relaxed text-center">
+                 Exclusive access for verified community members only.<br/>
+                 Powered by Gemini 3 Pro & Veo.
+              </p>
             </div>
           </form>
         )}
