@@ -86,7 +86,10 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
              </svg>
           </div>
-          <h1 className="text-sm font-black text-slate-500 uppercase tracking-[0.4em] mb-4">Identity Verification</h1>
+          <div className="flex flex-col items-center gap-1 mb-4">
+            <h1 className="text-sm font-black text-slate-500 uppercase tracking-[0.4em]">Identity Verification</h1>
+            <span className="text-[10px] font-black text-indigo-500/60 uppercase tracking-[0.6em]">TEST123</span>
+          </div>
           <h2 className="text-4xl font-black text-white text-center uppercase tracking-tight">AI Avatar <br/>Creator Pro</h2>
         </div>
         
