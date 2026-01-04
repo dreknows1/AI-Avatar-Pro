@@ -7,7 +7,7 @@ import { Navigation } from './components/Navigation';
 import { Profile } from './components/Profile';
 import { ImageGenerator } from './components/ImageGenerator';
 import { ApiKeySelector } from './components/ApiKeySelector';
-import { Login } from './components/Login';
+import { Login } from './src/components/Login';
 import { MAX_FREE_AVATARS } from './constants';
 import * as geminiService from './services/geminiService';
 import * as storageService from './services/storageService';
