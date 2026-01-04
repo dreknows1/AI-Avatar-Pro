@@ -1,0 +1,5 @@
+{
+  "name": "AI Avatar Creator Pro",
+  "description": "Create a unique AI avatar from a text prompt. This application uses Gemini 3 Pro to generate a high-fidelity reference portrait, then creates a full character sheet with various poses and expressions.",
+  "requestFramePermissions": []
+}
