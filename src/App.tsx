@@ -9,7 +9,6 @@ import { Profile } from './components/Profile';
 import { ImageGenerator } from './components/ImageGenerator';
 import { ApiKeySelector } from './components/ApiKeySelector';
 import { Login } from './components/Login';
-import { AuthCallback } from './components/AuthCallback';
 import { MAX_FREE_AVATARS } from './constants';
 import * as geminiService from './services/geminiService';
 import * as storageService from './services/storageService';
@@ -158,11 +157,6 @@ function App() {
           alert(error.message);
       }
   };
-
-  // Handle auth callback route
-  if (window.location.pathname === '/auth/callback') {
-    return <AuthCallback onAuthenticated={handleLogin} />;
-  }
 
   if (!isAuthenticated) return <Login onLogin={handleLogin} />;
 
